@@ -1,0 +1,25 @@
+### POST - Add User
+POST http://localhost:8081/users
+Content-Type: application/json
+
+{
+  "id": 3,
+  "name": "Priya",
+  "email": "priya@gmail.com"
+}
+
+### PUT - Update User
+PUT http://localhost:8081/users/3
+Content-Type: application/json
+
+{
+  "id": 3,
+  "name": "Priya Updated",
+  "email": "priya.updated@gmail.com"
+}
+
+### DELETE - Delete User
+DELETE http://localhost:8081/users/3
+
+### GET - Check Deleted User
+GET http://localhost:8081/users/3
