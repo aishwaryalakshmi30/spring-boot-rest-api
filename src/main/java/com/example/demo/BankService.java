@@ -11,7 +11,7 @@ public class BankService {
 
     public BankService() {
         list.add(new User(1, "Aishwarya", "aishwarya@gmail.com"));
-        list.add(new User(2, "Rahul", "rahul@gmail.com"));
+        list.add(new User(2, "Keerthi", "keerthi@gmail.com"));
     }
 
     public List<User> getUsers() {

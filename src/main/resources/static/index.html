@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank Management System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            flex: 1;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .card h2 {
+            margin: 0 0 10px;
+            color: #1e3a8a;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #1e3a8a;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #eff6ff;
+        }
+
+        @media (max-width: 700px) {
+            .cards {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Bank Management System</h1>
+    <p>Spring Boot REST API</p>
+</header>
+
+<div class="container">
+
+    <!-- Dashboard -->
+    <div class="cards">
+
+        <div class="card">
+            <h2>Users</h2>
+            <p id="userCount">0</p>
+        </div>
+
+        <div class="card">
+            <h2>Accounts</h2>
+            <p id="accountCount">0</p>
+        </div>
+
+    </div>
+
+
+    <!-- User Management -->
+    <div class="section">
+
+        <h2>User Management</h2>
+
+        <div class="form-group">
+            <label>User ID</label>
+            <input type="number" id="userId" placeholder="Enter user ID">
+        </div>
+
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="userName" placeholder="Enter name">
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="userEmail" placeholder="Enter email">
+        </div>
+
+        <button onclick="addUser()">Add User</button>
+        <button onclick="updateUser()">Update User</button>
+        <button onclick="loadUsers()">Refresh Users</button>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody id="userTable">
+            </tbody>
+        </table>
+
+    </div>
+
+
+    <!-- Account Management -->
+    <div class="section">
+
+        <h2>Account Management</h2>
+
+        <div class="form-group">
+            <label>Holder Name</label>
+            <input type="text" id="holderName" placeholder="Enter holder name">
+        </div>
+
+        <div class="form-group">
+            <label>Balance</label>
+            <input type="number" id="balance" placeholder="Enter balance">
+        </div>
+
+        <button onclick="addAccount()">Add Account</button>
+        <button onclick="updateAccount()">Update Account</button>
+        <button onclick="loadAccounts()">Refresh Accounts</button>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Holder Name</th>
+                <th>Balance</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody id="accountTable">
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // =========================
+    // USER APIs
+    // =========================
+
+    async function loadUsers() {
+
+        const response = await fetch("/users");
+        const users = await response.json();
+
+        const table = document.getElementById("userTable");
+
+        table.innerHTML = "";
+
+        users.forEach(user => {
+
+            const row = table.insertRow();
+
+            row.insertCell(0).innerText = user.id;
+            row.insertCell(1).innerText = user.name;
+            row.insertCell(2).innerText = user.email;
+
+            const buttonCell = row.insertCell(3);
+
+            buttonCell.innerHTML =
+                `<button class="delete-btn"
+                onclick="deleteUser(${user.id})">
+                Delete
+                </button>`;
+        });
+
+        document.getElementById("userCount").innerText = users.length;
+    }
+
+
+    async function addUser() {
+
+        const id = Number(document.getElementById("userId").value);
+        const name = document.getElementById("userName").value;
+        const email = document.getElementById("userEmail").value;
+
+        if (!id || !name || !email) {
+            alert("Please enter all user details");
+            return;
+        }
+
+        await fetch("/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: id,
+                name: name,
+                email: email
+            })
+        });
+
+        alert("User added successfully!");
+
+        loadUsers();
+    }
+
+
+    async function updateUser() {
+
+        const id = Number(document.getElementById("userId").value);
+        const name = document.getElementById("userName").value;
+        const email = document.getElementById("userEmail").value;
+
+        const response = await fetch("/users/" + id, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: id,
+                name: name,
+                email: email
+            })
+        });
+
+        if (response.ok) {
+            alert("User updated successfully!");
+            loadUsers();
+        } else {
+            alert("User not found");
+        }
+    }
+
+
+    async function deleteUser(id) {
+
+        const response = await fetch("/users/" + id, {
+            method: "DELETE"
+        });
+
+        alert(await response.text());
+
+        loadUsers();
+    }
+
+
+    // =========================
+    // ACCOUNT APIs
+    // =========================
+
+    async function loadAccounts() {
+
+        const response = await fetch("/accounts");
+        const accounts = await response.json();
+
+        const table = document.getElementById("accountTable");
+
+        table.innerHTML = "";
+
+        accounts.forEach(account => {
+
+            const row = table.insertRow();
+
+            row.insertCell(0).innerText = account.holderName;
+            row.insertCell(1).innerText = "₹ " + account.balance;
+
+            const buttonCell = row.insertCell(2);
+
+            buttonCell.innerHTML =
+                `<button class="delete-btn"
+                onclick="deleteAccount('${account.holderName}')">
+                Delete
+                </button>`;
+        });
+
+        document.getElementById("accountCount").innerText = accounts.length;
+    }
+
+
+    async function addAccount() {
+
+        const holderName =
+            document.getElementById("holderName").value;
+
+        const balance =
+            Number(document.getElementById("balance").value);
+
+        if (!holderName || !balance) {
+            alert("Please enter account details");
+            return;
+        }
+
+        await fetch("/accounts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                holderName: holderName,
+                balance: balance
+            })
+        });
+
+        alert("Account added successfully!");
+
+        loadAccounts();
+    }
+
+
+    async function updateAccount() {
+
+        const holderName =
+            document.getElementById("holderName").value;
+
+        const balance =
+            Number(document.getElementById("balance").value);
+
+        const response = await fetch(
+            "/accounts/" + encodeURIComponent(holderName),
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    holderName: holderName,
+                    balance: balance
+                })
+            }
+        );
+
+        if (response.ok) {
+            alert("Account updated successfully!");
+            loadAccounts();
+        } else {
+            alert("Account not found");
+        }
+    }
+
+
+    async function deleteAccount(holderName) {
+
+        const response = await fetch(
+            "/accounts/" + encodeURIComponent(holderName),
+            {
+                method: "DELETE"
+            }
+        );
+
+        alert(await response.text());
+
+        loadAccounts();
+    }
+
+
+    // Load data when page opens
+    loadUsers();
+    loadAccounts();
+
+</script>
+
+</body>
+</html>
